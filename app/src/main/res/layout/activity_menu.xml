@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:fillViewport="true"
+    >
+<LinearLayout
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activitys.MenuActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnYt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:drawableTop="@drawable/ic_baseline_play_arrow_24"
+        android:padding="18dp"
+        android:text="Catálogo do YouTube"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnInsta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:drawableTop="@drawable/ic_baseline_camera_alt_24"
+        android:padding="18dp"
+        android:text="Catálogo do Instagram"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnOutras"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:drawableTop="@drawable/ic_all"
+        android:padding="18dp"
+        android:text="Catálogo de outras redes sociais"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnDepoimentos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:drawableTop="@drawable/ic_depo"
+        android:padding="18dp"
+        android:text="Depoimentos"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnCompartilhatube"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:drawableTop="@drawable/ic_baseline_share_24"
+        android:padding="18dp"
+        android:text="Conheça o Compartilhatube"
+        android:textStyle="bold" />
+</LinearLayout></ScrollView>

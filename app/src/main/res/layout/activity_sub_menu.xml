@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutSubMenu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activitys.SubMenuActivity">
+
+    <Button
+        android:drawableTop="@drawable/ic_view"
+        android:id="@+id/btnViews"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:padding="18dp"
+        android:text="Button"
+        android:textColor="#FDFDFD"
+        android:textStyle="bold" />
+
+    <Button
+        android:drawableTop="@drawable/ic_comment"
+        android:id="@+id/btnComents"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:padding="18dp"
+        android:text="Button"
+        android:textColor="#FDFDFD"
+        android:textStyle="bold" />
+
+    <Button
+        android:drawableTop="@drawable/ic_like"
+        android:id="@+id/btnLikes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:padding="18dp"
+        android:text="Button"
+        android:textColor="#FDFDFD"
+        android:textStyle="bold" />
+
+    <Button
+        android:drawableTop="@drawable/ic_seguidores"
+        android:id="@+id/btnSeguidores"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="#0C0C0C"
+        android:padding="18dp"
+        android:text="Button"
+        android:textColor="#FDFDFD"
+        android:textStyle="bold" />
+</LinearLayout>
