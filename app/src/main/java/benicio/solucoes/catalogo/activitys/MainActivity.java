@@ -1,23 +1,42 @@
 package benicio.solucoes.catalogo.activitys;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import android.app.Dialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
+import benicio.solucoes.catalogo.R;
+import benicio.solucoes.catalogo.Service;
 import benicio.solucoes.catalogo.databinding.ActivityMainBinding;
+import benicio.solucoes.catalogo.databinding.LayoutCarregamentoBinding;
+import benicio.solucoes.catalogo.models.CatalogoModel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding vb;
+    private Retrofit retrofit;
+    private Service myService;
+
+    private CatalogoModel catalogoModel;
+
+    private Dialog dialog_carregando;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,13 +48,57 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(vb.getRoot());
 
-        getSupportActionBar().setTitle(
-                String.format("Preços de %s", "Visualizações no YouTube")
-        );
+        AlertDialog.Builder bc = new AlertDialog.Builder(MainActivity.this);
+        bc.setCancelable(false);
+        bc.setView(LayoutCarregamentoBinding.inflate(getLayoutInflater()).getRoot());
+        dialog_carregando = bc.create();
+        dialog_carregando.show();
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        Bundle b = getIntent().getExtras();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://catalogo-teal.vercel.app/")
+                        .addConverterFactory(GsonConverterFactory.create())
+                                .build();
+
+        myService = retrofit.create(Service.class);
+
+        myService.get_catalogo(b.getInt("type"), b.getInt("subType")).enqueue(new Callback<CatalogoModel>() {
+            @Override
+            public void onResponse(Call<CatalogoModel> call, Response<CatalogoModel> response) {
+                if (response.isSuccessful() ){
+                    catalogoModel = response.body();
+                    config_catalogo();
+                }else{
+                    Toast.makeText(getApplicationContext(),
+                            String.format("Erro %s ao fazer requisição", response.code()),
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CatalogoModel> call, Throwable t) {
+
+            }
+        });
+    }
+
+    public void config_catalogo(){
+        if ( catalogoModel.getType() == 0) {
+            vb.ly.setBackgroundResource(R.drawable.background_repat_yt);
+        }else {
+            vb.ly.setBackgroundResource(R.drawable.background_repeat_insta);
+        }
+        getSupportActionBar().setTitle(
+                String.format("Preços de %s", catalogoModel.getTitle())
+        );
+
+        Glide.with(this).load(catalogoModel.getUrl_photo()).into(vb.imagePromo);
+        vb.imagePromo.setVisibility(View.VISIBLE);
         vb.editTextQtd.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -54,11 +117,11 @@ public class MainActivity extends AppCompatActivity {
                     n_digitado = Integer.parseInt(s.toString());
                 }
 
-                if ( n_digitado >= 500 && n_digitado  <= 15000){
+                if ( n_digitado >= catalogoModel.getMin() && n_digitado  <= catalogoModel.getMax()){
                     vb.textView.setTextColor(Color.WHITE);
 
                     vb.seekBar2.setProgress(n_digitado);
-                    int valorReal = (20 * n_digitado ) / 500;
+                    int valorReal = (catalogoModel.getBase() * n_digitado ) / catalogoModel.getMin();
                     vb.textView.setText(String.format("Valor total R$ %s", valorReal));
                 }else{
                     vb.textView.setTextColor(Color.RED);
@@ -75,9 +138,9 @@ public class MainActivity extends AppCompatActivity {
         vb.seekBar2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    int valorReal = (20 * i) / 500;
-                    vb.editTextQtd.setText(i + "");
-                    vb.textView.setText(String.format("Valor total R$ %s", valorReal));
+                int valorReal = (catalogoModel.getBase() * i) / catalogoModel.getMin();
+                vb.editTextQtd.setText(i + "");
+                vb.textView.setText(String.format("Valor total R$ %s", valorReal));
             }
 
             @Override
@@ -89,6 +152,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        dialog_carregando.dismiss();
     }
 
     @Override

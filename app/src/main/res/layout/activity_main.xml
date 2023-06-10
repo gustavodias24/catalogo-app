@@ -8,9 +8,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
 
+        android:id="@+id/ly"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_repat_yt"
         android:gravity="center"
         android:orientation="vertical"
         tools:context=".activitys.MainActivity">
@@ -44,7 +44,7 @@
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="italic"
-            app:layout_constraintBottom_toTopOf="@+id/imageView3"
+            app:layout_constraintBottom_toTopOf="@+id/imagePromo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName" />
@@ -146,9 +146,10 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
-            android:id="@+id/imageView3"
+            android:id="@+id/imagePromo"
             android:layout_width="250dp"
             android:layout_height="250dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/btn_pagar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -165,7 +166,7 @@
             app:layout_constraintBottom_toTopOf="@+id/button2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+            app:layout_constraintTop_toBottomOf="@+id/imagePromo" />
 
         <Button
             android:id="@+id/button2"

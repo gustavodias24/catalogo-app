@@ -3,6 +3,7 @@ package benicio.solucoes.catalogo.activitys;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -48,26 +49,52 @@ public class SubMenuActivity extends AppCompatActivity {
 
         vb.layoutSubMenu.setBackgroundResource(R.drawable.background_repat_yt);
 
-//        vb.btnComents.setBackgroundColor(Color.parseColor("#00FF00"));
-//        vb.btnLikes.setBackgroundColor(Color.parseColor("#00FF00"));
-//        vb.btnSeguidores.setBackgroundColor(Color.parseColor("#00FF00"));
-//        vb.btnViews.setBackgroundColor(Color.parseColor("#00FF00"));
-
-
-        vb.btnComents.setText("Comentário para o YouTube");
+        vb.btnComents.setText("Comentários para o YouTube");
         vb.btnLikes.setText("Likes para o YouTube");
         vb.btnSeguidores.setText("Inscritos para o YouTube");
         vb.btnViews.setText("Engajamento para o YouTube");
+
+        vb.btnViews.setOnClickListener( viewYT -> {
+            go_catalogo(0, 0);
+        });
+
+        vb.btnSeguidores.setOnClickListener( viewSubs -> {
+            go_catalogo(0, 1);
+        });
+
+        vb.btnLikes.setOnClickListener( viewLikes -> {
+            go_catalogo(0, 2);
+        });
+
+        vb.btnComents.setOnClickListener( viewComents -> {
+            go_catalogo(0, 3);
+        });
     }
 
     public void configurarInsta(){
 
         vb.layoutSubMenu.setBackgroundResource(R.drawable.background_repeat_insta);
 
-        vb.btnComents.setText("Comentário para Instagram");
+        vb.btnComents.setText("Comentários para Instagram");
         vb.btnLikes.setText("Likes para Instagram");
         vb.btnSeguidores.setText("Seguidores para Instagram");
         vb.btnViews.setText("Visualizações para Instagram");
+
+        vb.btnViews.setOnClickListener( viewYT -> {
+            go_catalogo(1, 1);
+        });
+
+        vb.btnSeguidores.setOnClickListener( viewSubs -> {
+            go_catalogo(1, 2);
+        });
+
+        vb.btnLikes.setOnClickListener( viewLikes -> {
+            go_catalogo(1, 0);
+        });
+
+        vb.btnComents.setOnClickListener( viewComents -> {
+            go_catalogo(1, 3);
+        });
     }
 
     @Override
@@ -77,4 +104,12 @@ public class SubMenuActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void go_catalogo(int type, int subType){
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        i.putExtra("type", type);
+        i.putExtra("subType", subType);
+        startActivity(i);
+    }
+
 }
