@@ -1,12 +1,14 @@
 package benicio.solucoes.catalogo.activitys;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import android.app.Dialog;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,6 +18,10 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import benicio.solucoes.catalogo.R;
 import benicio.solucoes.catalogo.Service;
@@ -97,7 +103,18 @@ public class MainActivity extends AppCompatActivity {
                 String.format("Preços de %s", catalogoModel.getTitle())
         );
 
-        Glide.with(this).load(catalogoModel.getUrl_photo()).into(vb.imagePromo);
+        Glide.with(this).load(catalogoModel.getUrl_photo()).listener(new RequestListener<Drawable>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                return false;
+            }
+        }).into(vb.imagePromo);
+
         vb.imagePromo.setVisibility(View.VISIBLE);
         vb.editTextQtd.addTextChangedListener(new TextWatcher() {
             @Override
