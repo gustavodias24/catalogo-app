@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,8 +25,12 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import benicio.solucoes.catalogo.R;
-import benicio.solucoes.catalogo.Service;
+import benicio.solucoes.catalogo.databinding.LayoutEmailMercadoPagoBinding;
+import benicio.solucoes.catalogo.services.Service;
 import benicio.solucoes.catalogo.databinding.ActivityMainBinding;
 import benicio.solucoes.catalogo.databinding.LayoutCarregamentoBinding;
 import benicio.solucoes.catalogo.models.CatalogoModel;
@@ -34,15 +40,21 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+
+
 public class MainActivity extends AppCompatActivity {
+
+
 
     private ActivityMainBinding vb;
     private Retrofit retrofit;
     private Service myService;
 
     private CatalogoModel catalogoModel;
+    private Dialog dialog_carregando, dialog_pix;
 
-    private Dialog dialog_carregando;
+    private int qtd_comprada, precoAtual;
+    private String produto_title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
         Bundle b = getIntent().getExtras();
 
+
+
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://catalogo-teal.vercel.app/")
-                        .addConverterFactory(GsonConverterFactory.create())
-                                .build();
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
         myService = retrofit.create(Service.class);
 
@@ -91,31 +105,97 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        vb.btnPagar.setOnClickListener( viewPagar -> {
+            AlertDialog.Builder dialog_builder_pix = new AlertDialog.Builder(MainActivity.this);
+            dialog_builder_pix.setCancelable(false);
+            dialog_builder_pix.setNegativeButton("Cancelar", (dialog, which) -> dialog_pix.dismiss());
+            LayoutEmailMercadoPagoBinding vbPix = LayoutEmailMercadoPagoBinding.inflate(getLayoutInflater());
+            vbPix.btnConfirmarEmail.setOnClickListener( btnConfirmarEmailView -> {
+                String email_pix = vbPix.editTextEmail.getText().toString();
+                String regex_email = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+                Pattern pattern = Pattern.compile(regex_email);
+                Matcher matcher = pattern.matcher(email_pix);
+
+                if (matcher.matches()){
+                    Intent i = new Intent(getApplicationContext(), PagamentoActivity.class);
+                    i.putExtra("EmailPix", email_pix);
+                    //i.putExtra("valorPix", precoAtual);
+                    i.putExtra("valorPix", 1);
+                    i.putExtra("nomePix", produto_title);
+                    i.putExtra("qtdComprada", qtd_comprada);
+                    startActivity(i);
+                    Toast.makeText(this,
+                            "Pague o Pix para o seu pedido ser encaminhado com sucesso.",
+                            Toast.LENGTH_LONG).show();
+                    dialog_pix.dismiss();
+                }else{
+                    Toast.makeText(this,
+                            "Digite um E-mail válido!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog_builder_pix.setView(vbPix.getRoot());
+            dialog_pix = dialog_builder_pix.create();
+            dialog_pix.show();
+
+        });
+
     }
 
     public void config_catalogo(){
+        String zapPromo =
+        "https://api.whatsapp.com/send?phone=5591984044333&text=Ol%C3%A1%2C%20gostaria%20de%20saber%20as%20promo%C3%A7%C3%B5es%20de%20"+
+                catalogoModel.getTitle().replace("","%20");
+
+        vb.btnPromo.setOnClickListener( btnPromoView -> {
+            startActivity(
+                    new Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(zapPromo)));
+        });
+
         if ( catalogoModel.getType() == 0) {
             vb.ly.setBackgroundResource(R.drawable.background_repat_yt);
         }else {
             vb.ly.setBackgroundResource(R.drawable.background_repeat_insta);
         }
+
         getSupportActionBar().setTitle(
                 String.format("Preços de %s", catalogoModel.getTitle())
         );
 
-        Glide.with(this).load(catalogoModel.getUrl_photo()).listener(new RequestListener<Drawable>() {
+        Glide.with(MainActivity.this).load(catalogoModel.getUrl_photo()).listener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                vb.imagePromo.setVisibility(View.VISIBLE);
+                vb.progressBar.setVisibility(View.GONE);
                 return false;
             }
 
             @Override
             public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                vb.imagePromo.setVisibility(View.VISIBLE);
+                vb.progressBar.setVisibility(View.GONE);
                 return false;
             }
         }).into(vb.imagePromo);
 
-        vb.imagePromo.setVisibility(View.VISIBLE);
+        precoAtual = catalogoModel.getBase();
+        qtd_comprada = catalogoModel.getMin();
+        produto_title = catalogoModel.getTitle();
+
+        vb.textView.setText(String.format("Valor total R$ %s", catalogoModel.getBase()));
+
+        vb.editTextQtd.setText(catalogoModel.getMin() + "");
+        vb.seekBar2.setMax(catalogoModel.getMax());
+        vb.seekBar2.setMin(catalogoModel.getMin());
+
+        vb.textViewMax.setText(String.format("Máx %s", catalogoModel.getMax()));
+        vb.textViewMin.setText(String.format("Min %s", catalogoModel.getMin()));
+
+        vb.textDescribeProduto.setText(catalogoModel.getDescri());
+        vb.textTitleProduto.setText(catalogoModel.getTitle());
+
         vb.editTextQtd.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -129,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (s.length() == 0) {
                     vb.seekBar2.setProgress(0);
-                    vb.editTextQtd.setText("0"); // Define o texto como "0"
+                    vb.editTextQtd.setText("0"); // Define o texto como "0" sem o editText for vazio
                 }else{
                     n_digitado = Integer.parseInt(s.toString());
                 }
@@ -157,6 +237,8 @@ public class MainActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 int valorReal = (catalogoModel.getBase() * i) / catalogoModel.getMin();
                 vb.editTextQtd.setText(i + "");
+                precoAtual = valorReal;
+                qtd_comprada = i;
                 vb.textView.setText(String.format("Valor total R$ %s", valorReal));
             }
 
@@ -178,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home){
             finish();
         }
+
         return super.onOptionsItemSelected(item);
     }
+
 }

@@ -1,4 +1,4 @@
-package benicio.solucoes.catalogo;
+package benicio.solucoes.catalogo.services;
 
 import benicio.solucoes.catalogo.models.CatalogoModel;
 import retrofit2.Call;

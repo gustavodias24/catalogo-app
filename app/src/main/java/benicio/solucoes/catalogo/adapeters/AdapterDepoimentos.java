@@ -1,5 +1,6 @@
 package benicio.solucoes.catalogo.adapeters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ public class AdapterDepoimentos extends RecyclerView.Adapter<AdapterDepoimentos.
         return new MyViewHolder(v);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         String linkVideo  = linkVideos.get(position);
