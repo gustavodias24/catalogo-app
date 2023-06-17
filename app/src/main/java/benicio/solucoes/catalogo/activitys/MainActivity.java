@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -24,13 +25,14 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import benicio.solucoes.catalogo.R;
 import benicio.solucoes.catalogo.databinding.LayoutEmailMercadoPagoBinding;
-import benicio.solucoes.catalogo.services.Service;
+import benicio.solucoes.catalogo.services.ApiCatalogoService;
 import benicio.solucoes.catalogo.databinding.ActivityMainBinding;
 import benicio.solucoes.catalogo.databinding.LayoutCarregamentoBinding;
 import benicio.solucoes.catalogo.models.CatalogoModel;
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding vb;
     private Retrofit retrofit;
-    private Service myService;
+    private ApiCatalogoService myService;
 
     private CatalogoModel catalogoModel;
     private Dialog dialog_carregando, dialog_pix;
@@ -56,11 +58,17 @@ public class MainActivity extends AppCompatActivity {
     private int qtd_comprada, precoAtual;
     private String produto_title;
 
+    private SharedPreferences guardaEmail;
+    private SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+        guardaEmail = getSharedPreferences("guardarEmail", MODE_PRIVATE);
+        editor = guardaEmail.edit();
 
         vb = ActivityMainBinding.inflate(getLayoutInflater());
 
@@ -84,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        myService = retrofit.create(Service.class);
+        myService = retrofit.create(ApiCatalogoService.class);
 
         myService.get_catalogo(b.getInt("type"), b.getInt("subType")).enqueue(new Callback<CatalogoModel>() {
             @Override
@@ -107,37 +115,51 @@ public class MainActivity extends AppCompatActivity {
         });
 
         vb.btnPagar.setOnClickListener( viewPagar -> {
-            AlertDialog.Builder dialog_builder_pix = new AlertDialog.Builder(MainActivity.this);
-            dialog_builder_pix.setCancelable(false);
-            dialog_builder_pix.setNegativeButton("Cancelar", (dialog, which) -> dialog_pix.dismiss());
-            LayoutEmailMercadoPagoBinding vbPix = LayoutEmailMercadoPagoBinding.inflate(getLayoutInflater());
-            vbPix.btnConfirmarEmail.setOnClickListener( btnConfirmarEmailView -> {
-                String email_pix = vbPix.editTextEmail.getText().toString();
-                String regex_email = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-                Pattern pattern = Pattern.compile(regex_email);
-                Matcher matcher = pattern.matcher(email_pix);
+            String linkPub = vb.editLinkPub.getText().toString();
+            if (linkPub.isEmpty() || linkPub == null) {
+                Snackbar.make(
+                        viewPagar,
+                        "Escolha o link da sua publicação.",
+                        Snackbar.LENGTH_LONG
+                ).show();
+            }else {
+                AlertDialog.Builder dialog_builder_pix = new AlertDialog.Builder(MainActivity.this);
+                dialog_builder_pix.setCancelable(false);
+                dialog_builder_pix.setNegativeButton("Cancelar", (dialog, which) -> dialog_pix.dismiss());
+                LayoutEmailMercadoPagoBinding vbPix = LayoutEmailMercadoPagoBinding.inflate(getLayoutInflater());
 
-                if (matcher.matches()){
-                    Intent i = new Intent(getApplicationContext(), PagamentoActivity.class);
-                    i.putExtra("EmailPix", email_pix);
-                    //i.putExtra("valorPix", precoAtual);
-                    i.putExtra("valorPix", 1);
-                    i.putExtra("nomePix", produto_title);
-                    i.putExtra("qtdComprada", qtd_comprada);
-                    startActivity(i);
-                    Toast.makeText(this,
-                            "Pague o Pix para o seu pedido ser encaminhado com sucesso.",
-                            Toast.LENGTH_LONG).show();
-                    dialog_pix.dismiss();
-                }else{
-                    Toast.makeText(this,
-                            "Digite um E-mail válido!", Toast.LENGTH_SHORT).show();
-                }
-            });
-            dialog_builder_pix.setView(vbPix.getRoot());
-            dialog_pix = dialog_builder_pix.create();
-            dialog_pix.show();
+                vbPix.editTextEmail.setText(guardaEmail.getString("email", ""));
 
+                vbPix.btnConfirmarEmail.setOnClickListener(btnConfirmarEmailView -> {
+                    String email_pix = vbPix.editTextEmail.getText().toString();
+                    String regex_email = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+                    Pattern pattern = Pattern.compile(regex_email);
+                    Matcher matcher = pattern.matcher(email_pix);
+
+                    if (matcher.matches()) {
+                        Intent i = new Intent(getApplicationContext(), PagamentoActivity.class);
+                        i.putExtra("EmailPix", email_pix);
+                        i.putExtra("valorPix", precoAtual);
+                        i.putExtra("link", linkPub);
+//                        i.putExtra("valorPix", 1);
+                        i.putExtra("nomePix", produto_title);
+                        i.putExtra("qtdComprada", qtd_comprada);
+                        startActivity(i);
+                        Toast.makeText(this,
+                                "Pague o Pix para o seu pedido ser encaminhado com sucesso.",
+                                Toast.LENGTH_LONG).show();
+                        editor.putString("email", email_pix);
+                        editor.apply();
+                        dialog_pix.dismiss();
+                    } else {
+                        Toast.makeText(this,
+                                "Digite um E-mail válido!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                dialog_builder_pix.setView(vbPix.getRoot());
+                dialog_pix = dialog_builder_pix.create();
+                dialog_pix.show();
+            }
         });
 
     }
