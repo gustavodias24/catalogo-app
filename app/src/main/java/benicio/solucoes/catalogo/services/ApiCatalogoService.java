@@ -20,4 +20,7 @@ public interface ApiCatalogoService {
     @POST("/verificarPagamento")
     Call<GenericModel> verify_order (@Body GenericModel msg);
 
+    @GET("code")
+    Call<GenericModel> get_code();
+
 }
